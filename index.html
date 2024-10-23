@@ -1,0 +1,88 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta
+                http-equiv="Content-Security-Policy"
+                content="default-src 'self'; script-src 'self'"
+        />
+        <meta
+                http-equiv="X-Content-Security-Policy"
+                content="default-src 'self'; script-src 'self'"
+        />
+    <title>Docker PS Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<header>
+    Docker Containers
+    <button onclick="loadDockerData()">Refresh</button>
+</header>
+
+<table id="dockerTable">
+    <thead>
+    <tr>
+        <th>Container ID</th>
+        <th>Image</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    async function loadDockerData() {
+        try {
+            const containers = await window.electronAPI.getDockerPs();
+            console.log("Containers:", containers); // Add this line for debugging
+
+            const tableBody = document.querySelector('#dockerTable tbody');
+            tableBody.innerHTML = '';
+
+            containers.forEach(container => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${container.id}</td>
+                    <td>${container.image}</td>
+                    <td>${container.status}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (err) {
+            console.error("Error fetching Docker containers:", err);
+        }
+    }
+
+    // Load data initially
+    loadDockerData();
+</script>
+</body>
+</html>
