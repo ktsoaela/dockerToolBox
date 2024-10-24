@@ -265,25 +265,27 @@
     async function loadDockerData() {
         try {
             const containers = await window.electronAPI.getDockerPs();
-
+    
             const dockerList = document.getElementById('dockerList');
             const allContainerTable = document.getElementById('allContainerTable');
             const deadZoneTable = document.getElementById('deadZoneTable');
             const alwaysOnTable = document.getElementById('alwaysOnContainerTable');
-
+    
             dockerList.innerHTML = '';
             allContainerTable.innerHTML = '';
             deadZoneTable.innerHTML = '';
             alwaysOnTable.innerHTML = '';
-
+    
             let runningCount = 0;
             let allCount = 0;
             let deadZoneCount = 0;
             let alwaysOnCount = 0;
-
+    
             allContainerIds = [];
-
+    
             containers.forEach(container => {
+                const isAlwaysOn = container.restartPolicy.includes('unless-stopped'); // Check if restart policy is 'unless-stopped'
+    
                 const item = document.createElement('div');
                 item.href = "#";
                 item.className = "list-group-item list-group-item-action";
@@ -291,7 +293,7 @@
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">${container.id}</h5>
                     <small>Created @ ${container.createdAt}</small>
-
+    
                     <div class="nav-item dropdown">
                         <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class='bx bx-dots-vertical-rounded'></i>
@@ -301,44 +303,40 @@
                             <li><a class="dropdown-item" href="#" onclick="runDockerCommand('stop', '${container.id}')">Stop</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" onclick="showLogs('${container.id}')">Logs</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="runDockerCommand('always_on', '${container.id}')">Always On <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked"></a></li>
-                           
+                            <li><a class="dropdown-item" href="#">
+                                Always On 
+                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" ${isAlwaysOn ? 'checked' : ''} 
+                                    onclick="toggleAlwaysOn('${container.id}', this)">
+                            </a></li>
                         </ul>
                     </div>
                 </div>
                 <p class="mb-1">${container.image}</p>
                 <small>Restart Policy: ${container.restartPolicy}</small><br/>
                 <small>${container.status}</small>
-
-            `;
-
+                `;
+    
                 allCount++;
                 allContainerIds.push(container.id);
-
+    
                 // Add container to the 'Running Processes' list if it's running
                 if (container.status.includes('Up')) {
                     runningCount++;
                     dockerList.appendChild(item);
                 }
-
-                if (container.restartPolicy.includes('unless-stopped')) {
+    
+                if (isAlwaysOn) {
                     alwaysOnCount++;
                     alwaysOnTable.appendChild(item.cloneNode(true)); // Clone to reuse the item
                 }
-
+    
                 allContainerTable.appendChild(item.cloneNode(true)); // Clone to reuse
-
+    
                 if (container.status.includes('Exited') || container.status.includes('Created')) {
                     deadZoneCount++;
                     deadZoneTable.appendChild(item.cloneNode(true));
                 }
-
-                // Check if the container is "Always On"
-                if (container.alwaysOn) {
-                    alwaysOnCount++;
-                    alwaysOnTable.appendChild(item.cloneNode(true));
-                }
-
+    
                 // Update the badges with the counts
                 document.querySelector('#running-containers .badge').innerText = runningCount;
                 document.querySelector('#all-containers .badge').innerText = allCount;
@@ -349,6 +347,7 @@
             console.error("Error fetching Docker containers:", err);
         }
     }
+    
 
 
     function runDockerCommand(action, containerId) {
