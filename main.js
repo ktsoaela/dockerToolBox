@@ -9,6 +9,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        icon: path.join(__dirname, 'assets/img/tool-box.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
@@ -56,7 +57,7 @@ function createToolbox() {
 
 function createTray() {
     // Load tray icon image
-    const iconPath = path.join(__dirname, 'icon.png');
+    const iconPath = path.join(__dirname, 'assets/img/tool-box.png');
     tray = new Tray(nativeImage.createFromPath(iconPath));
 
     const contextMenu = Menu.buildFromTemplate([
