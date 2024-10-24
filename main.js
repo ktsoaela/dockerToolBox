@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage } = require('electron');const notifier = require('node-notifier');
+const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, Notification } = require('electron');const notifier = require('node-notifier');
 const { exec } = require('child_process');
 const path = require('path');
 
@@ -111,22 +111,27 @@ ipcMain.handle('run-docker-command', async (event, action, containerId) => {
             case 'start':
                 command = `docker start ${containerId}`;
                 console.log(`starting ${containerId}`);
+                showNotification('Container Starting', `Container ${containerId} is being started`);
                 break;
             case 'stop':
                 command = `docker stop ${containerId}`;
                 console.log(`stopping ${containerId}`);
+                showNotification('Container Stopping', `Container ${containerId} is being stopped`);
                 break;
             case 'restart':
                 command = `docker restart ${containerId}`;
                 console.log(`restarting ${containerId}`);
+                showNotification('Container Restarting', `Container ${containerId} is being restarted`);
                 break;
             case 'remove':
                 command = `docker rm ${containerId}`;
                 console.log(`removing ${containerId}`);
+                showNotification('Container Removed', `Container ${containerId} has been removed`);
                 break;
             case 'logs':
                 command = `docker logs ${containerId}`;
                 console.log(`showing logs for ${containerId}`);
+                showNotification('Fetching Logs', `Showing logs for ${containerId}`);
                 break;
             case 'tailedLogs':
                 command = `docker logs -f ${containerId}`;
@@ -245,26 +250,11 @@ ipcMain.on('blur', () => {
     toolboxWindow.hide();
 });
 
-ipcMain.on('notify', (event, { title, message }) => {
-    notifier.notify({
-        title: title || 'Default Title',
-        message: message || 'Default Message',
-        sound: true,
-        wait: true, // Wait for user action
-        timeout: 10, // Optional: wait 10 seconds before closing
-        icon: path.join(__dirname, 'icon.png'), // Optional icon path
-        timeout: 5, // Optional timeout (in seconds)
-    });
-});
 
-
-ipcMain.on('notify', (event, { title, message }) => {
-    notifier.notify({
+function showNotification(title, message) {
+    new Notification({
         title: title,
-        message: message,
-        sound: true, // Only Notification Center or Windows Toasters
-        wait: true, // Wait with callback until user action is taken on notification
-        icon: path.join(__dirname, 'icon.png'), // Optional icon path
-        timeout: 5, // Optional timeout (in seconds)
-    });
-});
+        body: message,
+        icon: path.join(__dirname, 'assets/img/tool-box.png') // Optional: path to notification icon
+    }).show();
+}
