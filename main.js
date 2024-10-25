@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, Notification } = require('electron');const notifier = require('node-notifier');
+const { app, BrowserWindow, Tray, Menu, ipcMain, nativeTheme, nativeImage, Notification } = require('electron');const notifier = require('node-notifier');
 const { exec } = require('child_process');
 const path = require('path');
 
@@ -91,6 +91,10 @@ function toggleToolbox() {
     }
 }
 
+ipcMain.on('theme-changed', (event, theme) => {
+    nativeTheme.themeSource = theme; // Change theme source
+    mainWindow.webContents.send('theme-changed', theme); // Notify renderer
+});
 
 app.on('ready', () => {
     createWindow();

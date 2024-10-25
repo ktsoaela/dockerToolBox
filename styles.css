@@ -1,7 +1,7 @@
 /* styles.css */
 
 /* Default to light mode */
-/* :root {
+* :root {
     --bs-body-bg: #ffffff;
     --bs-body-color: #000000;
     --bs-primary: #0d6efd;
@@ -16,7 +16,7 @@
 }
 
 /* Dark mode overrides */
-/* @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
     :root {
         --bs-body-bg: #212529;
         --bs-body-color: #ffffff;
@@ -30,30 +30,11 @@
         --bs-dark: #212529;
         --bs-border-color: #343a40;
     }
-} */
+}
 
 body {
-    /* background-color: var(--bs-body-bg); */
-    /* color: var(--bs-body-color); */
-    font-size: 12px;
-}
-/* 
-.navbar, .nav-pills, .dropdown-menu {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
+    font-size: 12px;
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
-
-.btn-primary {
-    background-color: var(--bs-primary);
-}
-
-.badge {
-    background-color: var(--bs-secondary);
-    color: var(--bs-body-bg);
-}
-
-.list-group-item {
-    background-color: var(--bs-light);
-    color: var(--bs-body-color);
-    border-color: var(--bs-border-color);
-} */
