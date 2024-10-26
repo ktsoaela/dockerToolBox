@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const path = require('path');
 
 let mainWindow;
+let logStreams = {};
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -51,8 +52,8 @@ function createToolbox() {
         if (y + toolboxWindow.getBounds().height > height) toolboxWindow.setBounds({ y: height - toolboxWindow.getBounds().height });
     });
     
-    // toolboxWindow.setPosition(mainWindow.getBounds().x + mainWindow.getBounds().width, mainWindow.getBounds().y);
-    // mainWindow.webContents.openDevTools();
+    toolboxWindow.setPosition(mainWindow.getBounds().x + mainWindow.getBounds().width, mainWindow.getBounds().y);
+    mainWindow.webContents.openDevTools();
 }
 
 function createTray() {
@@ -185,6 +186,18 @@ const getRestartPolicy = (containerId) => {
     });
 };
 
+// Add this in your main process
+ipcMain.handle('get-container-details', async (event, containerId) => {
+    try {
+        const containers = await dockerPs(); // Assuming this fetches all containers
+        const containerDetails = containers.find(container => container.id === containerId);
+        return containerDetails || null; // Return found details or null if not found
+    } catch (error) {
+        console.error(`Error getting container details for ${containerId}:`, error);
+        throw error;
+    }
+});
+
 ipcMain.handle('docker-ps', async () => {
     return new Promise((resolve, reject) => {
         exec('docker ps -a --format "{{.ID}}|{{.Image}}|{{.Status}}|{{.CreatedAt}}"', async (error, stdout, stderr) => {
@@ -239,6 +252,72 @@ function openTerminalWithLogs(containerId) {
         }
     });
 }
+
+
+ipcMain.handle('get-container-logs', async (event, containerId) => {
+    return new Promise((resolve, reject) => {
+        exec(`docker logs ${containerId}`, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr);
+                return;
+            }
+            resolve(stdout.trim());
+        });
+    });
+});
+
+ipcMain.handle('get-container-folder-structure', async (event, containerId) => {
+    return new Promise((resolve, reject) => {
+        exec(`docker exec ${containerId} ls -R`, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr);
+                return;
+            }
+            resolve(stdout.trim());
+        });
+    });
+});
+
+ipcMain.handle('run-container-command', async (event, containerId, command) => {
+    return new Promise((resolve, reject) => {
+        exec(`docker exec ${containerId} ${command}`, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr);
+                return;
+            }
+            resolve(stdout.trim());
+        });
+    });
+});
+
+
+ipcMain.handle('start-log-stream', (event, containerId) => {
+    if (logStreams[containerId]) {
+        logStreams[containerId].kill(); // Ensure no existing stream for this container
+    }
+
+    const logStream = spawn('docker', ['logs', '-f', containerId]);
+    logStreams[containerId] = logStream;
+
+    logStream.stdout.on('data', (data) => {
+        event.sender.send(`log-update-${containerId}`, data.toString()); // Send logs to renderer
+    });
+
+    logStream.stderr.on('data', (data) => {
+        event.sender.send(`log-update-${containerId}`, `Error: ${data.toString()}`);
+    });
+
+    logStream.on('close', () => {
+        delete logStreams[containerId];
+    });
+});
+
+ipcMain.handle('stop-log-stream', (event, containerId) => {
+    if (logStreams[containerId]) {
+        logStreams[containerId].kill(); // Terminate the stream process
+        delete logStreams[containerId];
+    }
+});
 
 
 ipcMain.on('minimize', (event) => {

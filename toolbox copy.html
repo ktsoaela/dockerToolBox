@@ -1,0 +1,447 @@
+<!-- toolbox.html -->
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+    <script src="assets/js/color-modes.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Docker Toolbox</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="output.css">
+
+    <style>
+        .window {
+            max-height: 400px;
+            /* Adjust this height as needed */
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .alert {
+            position: fixed;
+            /* This keeps the alert visible on the screen */
+            bottom: 20px;
+            /* Position it at the bottom */
+            left: 20px;
+            /* Position it from the left */
+            z-index: 1050;
+            /* Make sure it's above other content */
+        }
+
+        #searchInput {
+            width: 350px;
+            display: inline-block;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        .logoPlacement {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Optional: Adjust spacing between image and text */
+        }
+        
+    </style>
+</head class="bg-body-tertiary">
+<body>
+    <div class="container text-center">
+        <div class="row">
+            <div class="col pt-3 logoPlacement">
+                <img src="./assets/img/tool-box(64px).png">
+                <h6>Docker <span>Toolbox</span></h6>
+            </div>
+            <div class="col-6">
+
+            </div>
+            <div class="col pt-3">
+                <div class="nav-item dropdown bd-mode-toggle">
+                    <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class='bx bx-cog bx-xs'></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">                        <li><a class="dropdown-item" href="#" onclick="loadDockerData()">Refresh</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="minimizeWindow()">Minimize</a></li>
+                        <li><a class="dropdown-item" id="themeToggle" href="#" data-bs-theme-value="dark">Switch to Dark
+                                Mode</a></li>
+                        <li><a class="dropdown-item" id="themeToggleLight" href="#" data-bs-theme-value="light">Switch
+                                to Light Mode</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="closeWindow()">Close</a></li>
+                    </ul>
+                </div>
+                <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class='bx bx-trash bx-xs'></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="">Prune System</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+   <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="running-containers-tab" data-bs-toggle="pill"
+                        data-bs-target="#running-containers" type="button" role="tab" aria-controls="running-containers"
+                        aria-selected="true">Running</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="all-containers-tab" data-bs-toggle="pill"
+                        data-bs-target="#all-containers" type="button" role="tab" aria-controls="all-containers"
+                        aria-selected="false">All</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="dead-containers-tab" data-bs-toggle="pill"
+                        data-bs-target="#dead-containers" type="button" role="tab" aria-controls="dead-containers"
+                        aria-selected="false">Dead</button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="always-on-containers-tab" data-bs-toggle="pill"
+                        data-bs-target="#always-on-containers" type="button" role="tab"
+                        aria-controls="always-on-containers" aria-selected="false">Always On</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-disabled" type="button" role="tab" aria-controls="pills-disabled"
+                        aria-selected="false" disabled>Disabled</button>
+                </li>
+            </ul>
+
+            <div class="mb-3">
+                <input type="text" class="nav-item form-control form-control-sm d-none" id="searchInput"
+                    placeholder="Search containers..." />
+                <a class="nav-item btn btn-light" id="searchButton">
+                    <i class='bx bx-search'></i>
+                </a>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="running-containers" role="tabpanel"
+            aria-labelledby="running-containers-tab" tabindex="0">
+            <div class="container text-center">
+                <div class="row py-2">
+                    <div class="col">
+                        Running Processes
+                    </div>
+                    <div class="col-4">
+                        <span class="badge text-bg-primary rounded-pill">14</span>
+                    </div>
+                    <div class="col">
+                        <button class="float-right btn btn-primary btn-sm"
+                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
+                            onclick="restartAllContainers()">
+                            Restart All
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group window" id="dockerList">
+            </div>
+        </div>
+        <div class="tab-pane fade" id="all-containers" role="tabpanel" aria-labelledby="all-containers-tab"
+            tabindex="0">
+            <div class="container text-center">
+                <div class="row py-2">
+                    <div class="col">
+                        All Processes
+                    </div>
+                    <div class="col-4">
+                        <span class="badge text-bg-primary rounded-pill">14</span>
+                    </div>
+                    <div class="col">
+                        <button class="float-right btn btn-primary btn-sm"
+                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
+                            onclick="restartAllContainers()">
+                            Restart All
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group window" id="allContainerTable"></div>
+        </div>
+        <div class="tab-pane fade" id="dead-containers" role="tabpanel" aria-labelledby="dead-containers-tab"
+            tabindex="0">
+            <div class="container text-center">
+                <div class="row py-2">
+                    <div class="col">
+                        Dead Processes
+                    </div>
+                    <div class="col-4">
+                        <span class="badge text-bg-primary rounded-pill">14</span>
+                    </div>
+                    <div class="col">
+                        <button class="float-right btn btn-primary btn-sm"
+                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
+                            onclick="restartAllContainers()">
+                            Restart All
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group window" id="deadZoneTable"></div>
+        </div>
+        <div class="tab-pane fade" id="always-on-containers" role="tabpanel" aria-labelledby="always-on-containers-tab">
+            <div class="container text-center">
+                <div class="row py-2">
+                    <div class="col">
+                        Always On Processes
+                    </div>
+                    <div class="col-4">
+                        <span class="badge text-bg-primary rounded-pill">0</span>
+                    </div>
+                    <div class="col">
+                        <button class="float-right btn btn-primary btn-sm"
+                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
+                            onclick="restartAllContainers()">
+                            Restart All
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group window container-fluid" id="alwaysOnContainerTable"></div>
+        </div>
+
+        <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab"
+            tabindex="0">...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchButton = document.getElementById('searchButton');
+            const searchInput = document.getElementById('searchInput');
+            const pillsTab = document.getElementById('pills-tab');
+            // Toggle between showing the nav pills and search input
+            searchButton.addEventListener('click', () => {
+                // Hide the nav-pills
+                pillsTab.classList.toggle('d-none');
+                // Show the search input field
+                searchInput.classList.toggle('d-none');
+                searchInput.focus();
+            });
+            // Filter containers based on search input
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase();
+                // Get all containers from the list
+                const containerList = document.querySelectorAll('.list-group-item');
+                containerList.forEach(item => {
+                    const containerText = item.innerText.toLowerCase();
+                    // Check if the container's text includes the search query
+                    if (containerText.includes(query)) {
+                        item.classList.remove('d-none'); // Show matching items
+                    } else {
+                        item.classList.add('d-none'); // Hide non-matching items
+                    }
+                });
+            });
+        });
+        const themeToggleButton = document.getElementById('themeToggle');
+        // Check if dark mode is already applied (for persistence)
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggleButton.textContent = 'Switch to Light Mode';
+        }
+        themeToggleButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+            themeToggleButton.textContent = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        });
+
+        function toggleAlwaysOn(containerId, element) {
+            const isChecked = element.querySelector('input[type="checkbox"]').checked;
+            const action = isChecked ? 'always_on' : 'remove_always_on';
+            // Execute docker update to toggle the always-on status
+            runDockerCommand(action, containerId)
+                .then(output => {
+                    console.log(`Container ${containerId} updated: ${output}`);
+                    loadDockerData(); // Reload data to refresh UI
+                })
+                .catch(error => {
+                    console.error(`Error updating container ${containerId}:`, error);
+                    // Optionally show a notification or revert the checkbox in case of error
+                    element.querySelector('input[type="checkbox"]').checked = !isChecked;
+                });
+        }
+        async function loadDockerData() {
+            try {
+                const containers = await window.electronAPI.getDockerPs();
+                const dockerList = document.getElementById('dockerList');
+                const allContainerTable = document.getElementById('allContainerTable');
+                const deadZoneTable = document.getElementById('deadZoneTable');
+                const alwaysOnTable = document.getElementById('alwaysOnContainerTable');
+                dockerList.innerHTML = '';
+                allContainerTable.innerHTML = '';
+                deadZoneTable.innerHTML = '';
+                alwaysOnTable.innerHTML = '';
+                let runningCount = 0;
+                let allCount = 0;
+                let deadZoneCount = 0;
+                let alwaysOnCount = 0;
+                allContainerIds = [];
+                containers.forEach(container => {
+                    const isAlwaysOn = container.restartPolicy.includes(
+                        'unless-stopped'); // Check if restart policy is 'unless-stopped'
+                    const item = document.createElement('div');
+                    item.href = "#";
+                    item.className = "list-group-item list-group-item-action";
+                    item.innerHTML = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${container.id}</h5>
+                    <small>Created @ ${container.createdAt}</small>
+    
+                    <div class="nav-item dropdown">
+                        <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class='bx bx-dots-vertical-rounded'></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="runDockerCommand('restart', '${container.id}')">Restart</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="runDockerCommand('stop', '${container.id}')">Stop</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="showLogs('${container.id}')">Logs</a></li>
+                            <li><a class="dropdown-item" href="#">
+                                Always On 
+                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" ${isAlwaysOn ? 'checked' : ''} 
+                                    onclick="toggleAlwaysOn('${container.id}', this)">
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mb-1">${container.image}</p>
+                <small>Restart Policy: ${container.restartPolicy}</small><br/>
+                <small>${container.status}</small>
+                `;
+                    allCount++;
+                    allContainerIds.push(container.id);
+                    // Add container to the 'Running Processes' list if it's running
+                    if (container.status.includes('Up')) {
+                        runningCount++;
+                        dockerList.appendChild(item);
+                    }
+                    if (isAlwaysOn) {
+                        alwaysOnCount++;
+                        alwaysOnTable.appendChild(item.cloneNode(true)); // Clone to reuse the item
+                    }
+                    allContainerTable.appendChild(item.cloneNode(true)); // Clone to reuse
+                    if (container.status.includes('Exited') || container.status.includes('Created')) {
+                        deadZoneCount++;
+                        deadZoneTable.appendChild(item.cloneNode(true));
+                    }
+                    // Update the badges with the counts
+                    document.querySelector('#running-containers .badge').innerText = runningCount;
+                    document.querySelector('#all-containers .badge').innerText = allCount;
+                    document.querySelector('#dead-containers .badge').innerText = deadZoneCount;
+                    document.querySelector('#always-on-containers .badge').innerText = alwaysOnCount;
+                });
+            } catch (err) {
+                console.error("Error fetching Docker containers:", err);
+            }
+        }
+
+        function runDockerCommand(action, containerId) {
+            window.electronAPI.runDockerCommand(action, containerId)
+                .then(output => console.log(`Docker command ${action} executed: ${output}`))
+                .catch(error => console.error(`Error executing ${action}:`, error));
+        }
+        async function restartAllContainers() {
+            // Check which tab is active
+            const activeTab = document.querySelector('.tab-pane.active');
+            let containerIdsToRestart = [];
+            if (activeTab.id === 'running-containers') {
+                console.log('Restarting for Running Containers');
+                containerIdsToRestart = Array.from(document.querySelectorAll('#dockerList .list-group-item'))
+                    .map(item => item.querySelector('h5').innerText);
+            } else if (activeTab.id === 'all-containers') {
+                console.log('Restarting for All Containers');
+                containerIdsToRestart = Array.from(document.querySelectorAll('#allContainerTable .list-group-item'))
+                    .map(item => item.querySelector('h5').innerText);
+            } else if (activeTab.id === 'dead-containers') {
+                console.log('Restarting for All Dead Containers');
+                containerIdsToRestart = Array.from(document.querySelectorAll('#deadZoneTable .list-group-item'))
+                    .map(item => item.querySelector('h5').innerText);
+            } else if (activeTab.id === 'always-on-containers') {
+                console.log('Restarting for All On Containers');
+                containerIdsToRestart = Array.from(document.querySelectorAll(
+                        '#alwaysOnContainerTable .list-group-item'))
+                    .map(item => item.querySelector('h5').innerText);
+            }
+            // Status area for showing which container is being restarted
+            const statusArea = document.createElement('div');
+            statusArea.className = "alert alert-primary alert-dismissible fade show";
+            statusArea.setAttribute("role", "alert");
+            statusArea.innerHTML = `
+            <strong>Restarting containers...</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+            document.body.appendChild(statusArea);
+            // Restart each container in the collected IDs
+            for (const containerId of containerIdsToRestart) {
+                statusArea.querySelector('strong').innerText = `Restarting Container: ${containerId}`;
+                console.log("Restarting Container:", containerId);
+                try {
+                    await runDockerCommand('restart', containerId);
+                    console.log(`Container ${containerId} restarted.`);
+                } catch (error) {
+                    console.error(`Error restarting ${containerId}:`, error);
+                    statusArea.innerHTML += `<div>Failed to restart: ${containerId}</div>`;
+                }
+            }
+            // After processing all, remove the status area or update it
+            statusArea.innerText = "All specified containers have been processed.";
+            console.log("All specified containers have been processed.");
+        }
+
+        function showLogs(containerId) {
+            window.electronAPI.runDockerCommand('tailedLogs', containerId)
+                .then(output => {
+                    console.log(`Logs for container ${containerId}:`, output);
+                    // Here, you could open a new window or terminal to display the logs.
+                    openTerminalWithLogs(containerId);
+                })
+                .catch(error => console.error(`Error fetching logs for ${containerId}:`, error));
+        }
+
+        function openTerminalWithLogs(containerId) {
+            const {
+                exec
+            } = require('child_process');
+            exec(`gnome-terminal -- docker logs -f ${containerId}`, (error) => {
+                if (error) {
+                    console.error(`Error opening terminal for logs: ${error}`);
+                }
+            });
+        }
+
+        function minimizeWindow() {
+            window.electronAPI.minimize();
+        }
+
+        function closeWindow() {
+            window.electronAPI.close();
+        }
+        loadDockerData(); // Load data initially
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
