@@ -138,7 +138,7 @@
 
 
         .window {
-            height: 800x;
+            height: 450px;
             overflow-y: auto;
             overflow-x: hidden;
             width: 100%; /* Ensures it takes up the full available width */
@@ -157,7 +157,7 @@
         }
 
         #searchInput {
-            width: 350px;
+            width: 380px;
             display: inline-block;
         }
 
@@ -198,18 +198,18 @@
     <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
         <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button"
             aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
-            <svg class="bi my-1 theme-icon-active" width="1em" height="1em">
-                <use href="#circle-half"></use>
-            </svg>
+            <span class="bi my-1 theme-icon-active" width="1em" height="1em">
+                <i class='bx bxs-circle' style='color:#ffffff' ></i>
+            </span>
             <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
             <li>
                 <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"
                     aria-pressed="false">
-                    <svg class="bi me-2 opacity-50" width="1em" height="1em">
-                        <use href="#sun-fill"></use>
-                    </svg>
+                    <span class="bi me-2 opacity-50" width="1em" height="1em">
+                        <i class='bx bxs-sun'></i>
+                    </span>
                     Light
                     <svg class="bi ms-auto d-none" width="1em" height="1em">
                         <use href="#check2"></use>
@@ -219,9 +219,10 @@
             <li>
                 <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
                     aria-pressed="false">
-                    <svg class="bi me-2 opacity-50" width="1em" height="1em">
-                        <use href="#moon-stars-fill"></use>
-                    </svg>
+                    <span class="bi me-2 opacity-50" width="1em" height="1em">
+                        <i class='bx bxs-moon' style='color:#ffffff' ></i>
+                    </span>
+                   
                     Dark
                     <svg class="bi ms-auto d-none" width="1em" height="1em">
                         <use href="#check2"></use>
@@ -231,9 +232,9 @@
             <li>
                 <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"
                     aria-pressed="true">
-                    <svg class="bi me-2 opacity-50" width="1em" height="1em">
-                        <use href="#circle-half"></use>
-                    </svg>
+                    <span class="bi me-2 opacity-50" width="1em" height="1em">
+                        <i class='bx bxs-circle' style='color:#ffffff' ></i>
+                    </span>
                     Auto
                     <svg class="bi ms-auto d-none" width="1em" height="1em">
                         <use href="#check2"></use>
@@ -312,9 +313,12 @@
                     </li>
                 </ul>
     
-                <div class="mb-3">
-                    <input type="text" class="nav-item form-control form-control-sm d-none" id="searchInput"
+                <div class="nav nav-pills mb-3">
+                    <input type="text" class="nav-item form-control form-control-sm d-none me-1" id="searchInput"
                         placeholder="Search containers..." />
+
+                        
+                        
                     <a class="nav-item btn btn-light" id="searchButton">
                         <i class='bx bx-search'></i>
                     </a>
@@ -532,11 +536,18 @@
                             <li><a class="dropdown-item" href="#" onclick="runDockerCommand('stop', '${container.id}')">Stop</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" onclick="showLogs('${container.id}')">Logs</a></li>
-                            <li><a class="dropdown-item" href="#">
-                                Always On 
-                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" ${isAlwaysOn ? 'checked' : ''} 
-                                    onclick="toggleAlwaysOn('${container.id}', this)">
-                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showLogs('${container.id}')">Shell</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showLogs('${container.id}')">Folder</a></li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
+                                        ${isAlwaysOn ? 'checked' : ''} onclick="toggleAlwaysOn('${container.id}', this)"
+                                    >
+                                    <label class="form-check-label" for="flexSwitchCheckDefault">Always On</label>
+                                    </div>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
