@@ -2,6 +2,7 @@
 const { app, BrowserWindow, Tray, Menu, ipcMain, nativeTheme, nativeImage, Notification } = require('electron');const notifier = require('node-notifier');
 const { exec } = require('child_process');
 const path = require('path');
+const os = require('os');
 
 let mainWindow;
 let logStreams = {};
@@ -14,7 +15,7 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
-            contextIsolation: true // Turn off context isolation to access Node in renderer
+            contextIsolation: true
         },
     });
 
@@ -109,41 +110,140 @@ app.on('ready', () => {
     });
 });
 
+function openTerminalWithLogs(containerId) {
+    let command;
+
+    if (os.platform() === 'win32') {
+        command = `start cmd /k "docker logs -f ${containerId}"`;
+    } else if (os.platform() === 'linux') {
+        command = `gnome-terminal -- docker logs -f ${containerId}`;
+    } else if (os.platform() === 'darwin') {
+        command = `osascript -e 'tell application "Terminal" to do script "docker logs -f ${containerId}"'`;
+    } else {
+        console.error('Unsupported operating system for opening terminal');
+        return;
+    }
+
+    exec(command, (error) => {
+        if (error) {
+            console.error(`Error opening terminal for logs: ${error}`);
+        }
+    });
+}
+
+function openShellInContainer(containerId) {
+    let command;
+
+    if (os.platform() === 'win32') {
+        command = `start cmd /k "docker exec -it ${containerId} /bin/bash"`;
+    } else if (os.platform() === 'linux') {
+        command = `gnome-terminal -- docker exec -it ${containerId} /bin/bash`;
+    } else if (os.platform() === 'darwin') {
+        command = `osascript -e 'tell application "Terminal" to do script "docker exec -it ${containerId} /bin/bash"'`;
+    } else {
+        console.error('Unsupported operating system for opening shell');
+        return;
+    }
+
+    exec(command, (error) => {
+        if (error) {
+            console.error(`Error opening shell for container: ${error}`);
+        }
+    });
+}
+
+
+function openProjectFolder(containerId) {
+    return new Promise((resolve, reject) => {
+        // Get the project folder path based on containerId
+        getProjectFolder(containerId)
+            .then((projectFolderPath) => {
+                let command;
+                const platform = os.platform();
+
+                if (platform === 'linux') {
+                    command = `xdg-open ${projectFolderPath}`;
+                    console.log(`Opening project folder for container ${containerId} on Linux`);
+                } else if (platform === 'darwin') {
+                    command = `open ${projectFolderPath}`;
+                    console.log(`Opening project folder for container ${containerId} on macOS`);
+                } else if (platform === 'win32') {
+                    command = `explorer.exe "${projectFolderPath}"`;
+                    console.log(`Opening project folder for container ${containerId} on Windows`);
+                } else {
+                    console.error('Unsupported operating system for folder command');
+                    reject('Unsupported operating system');
+                    return;
+                }
+
+                exec(command, (error) => {
+                    if (error) {
+                        console.error(`Error opening project folder: ${error}`);
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+            })
+            .catch(reject);
+    });
+}
+
+function getProjectFolder(containerId) {
+    return new Promise((resolve, reject) => {
+        exec(`docker inspect ${containerId}`, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr);
+                return;
+            }
+            const containerInfo = JSON.parse(stdout);
+            const mounts = containerInfo[0].Mounts;
+            if (mounts.length > 0) {
+                // Assuming you want the first mount's source path
+                const projectFolder = mounts[0].Source;
+                resolve(projectFolder);
+            } else {
+                reject('No volumes mounted for this container');
+            }
+        });
+    });
+}
+
+
 ipcMain.handle('run-docker-command', async (event, action, containerId) => {
     return new Promise((resolve, reject) => {
         let command;
         switch (action) {
             case 'start':
                 command = `docker start ${containerId}`;
-                console.log(`starting ${containerId}`);
+                console.log(`Starting ${containerId}`);
                 showNotification('Container Starting', `Container ${containerId} is being started`);
                 break;
             case 'stop':
                 command = `docker stop ${containerId}`;
-                console.log(`stopping ${containerId}`);
+                console.log(`Stopping ${containerId}`);
                 showNotification('Container Stopping', `Container ${containerId} is being stopped`);
                 break;
             case 'restart':
                 command = `docker restart ${containerId}`;
-                console.log(`restarting ${containerId}`);
+                console.log(`Restarting ${containerId}`);
                 showNotification('Container Restarting', `Container ${containerId} is being restarted`);
                 break;
             case 'remove':
                 command = `docker rm ${containerId}`;
-                console.log(`removing ${containerId}`);
+                console.log(`Removing ${containerId}`);
                 showNotification('Container Removed', `Container ${containerId} has been removed`);
                 break;
             case 'logs':
                 command = `docker logs ${containerId}`;
-                console.log(`showing logs for ${containerId}`);
+                console.log(`Showing logs for ${containerId}`);
                 showNotification('Fetching Logs', `Showing logs for ${containerId}`);
                 break;
             case 'tailedLogs':
-                command = `docker logs -f ${containerId}`;
-                console.log(`showing tailed logs for ${containerId}`);
-                break;
+                openTerminalWithLogs(containerId);
+                return;
             case 'always_on':
-                const isAlwaysOn = containerId.alwaysOn; // Assuming you track this state
+                const isAlwaysOn = containerId.alwaysOn;
                 command = isAlwaysOn ?
                     `docker update --restart no ${containerId}` :
                     `docker update --restart unless-stopped ${containerId}`;
@@ -151,12 +251,20 @@ ipcMain.handle('run-docker-command', async (event, action, containerId) => {
                 break;
             case 'remove_always_on':
                 command = `docker update --restart no ${containerId}`;
-                console.log(`removing always on from ${containerId}`);
+                console.log(`Removing always on from ${containerId}`);
                 break;
             case 'prune':
                 command = `docker system prune -a`;
-                console.log(`system pruning docker`);
+                console.log(`System pruning docker`);
                 break;
+            case 'shell':
+                openShellInContainer(containerId); 
+                return;
+            case 'folder':
+                openProjectFolder(containerId)
+                    .then(() => resolve())
+                    .catch((err) => reject(err));
+                return; 
             default:
                 reject('Unknown action');
                 return;
@@ -234,50 +342,6 @@ ipcMain.handle('docker-ps', async () => {
     });
 });
 
-function openTerminalWithLogs(containerId) {
-    const os = require('os');
-    let command;
-
-    if (os.platform() === 'win32') {
-        command = `start cmd /k "docker logs -f ${containerId}"`;
-    } else if (os.platform() === 'linux') {
-        command = `gnome-terminal -- docker logs -f ${containerId}`;
-    } else if (os.platform() === 'darwin') {
-        command = `osascript -e 'tell application "Terminal" to do script "docker logs -f ${containerId}"'`;
-    }
-
-    exec(command, (error) => {
-        if (error) {
-            console.error(`Error opening terminal for logs: ${error}`);
-        }
-    });
-}
-
-
-ipcMain.handle('get-container-logs', async (event, containerId) => {
-    return new Promise((resolve, reject) => {
-        exec(`docker logs ${containerId}`, (error, stdout, stderr) => {
-            if (error) {
-                reject(stderr);
-                return;
-            }
-            resolve(stdout.trim());
-        });
-    });
-});
-
-ipcMain.handle('get-container-folder-structure', async (event, containerId) => {
-    return new Promise((resolve, reject) => {
-        exec(`docker exec ${containerId} ls -R`, (error, stdout, stderr) => {
-            if (error) {
-                reject(stderr);
-                return;
-            }
-            resolve(stdout.trim());
-        });
-    });
-});
-
 ipcMain.handle('run-container-command', async (event, containerId, command) => {
     return new Promise((resolve, reject) => {
         exec(`docker exec ${containerId} ${command}`, (error, stdout, stderr) => {
@@ -288,35 +352,6 @@ ipcMain.handle('run-container-command', async (event, containerId, command) => {
             resolve(stdout.trim());
         });
     });
-});
-
-
-ipcMain.handle('start-log-stream', (event, containerId) => {
-    if (logStreams[containerId]) {
-        logStreams[containerId].kill(); // Ensure no existing stream for this container
-    }
-
-    const logStream = spawn('docker', ['logs', '-f', containerId]);
-    logStreams[containerId] = logStream;
-
-    logStream.stdout.on('data', (data) => {
-        event.sender.send(`log-update-${containerId}`, data.toString()); // Send logs to renderer
-    });
-
-    logStream.stderr.on('data', (data) => {
-        event.sender.send(`log-update-${containerId}`, `Error: ${data.toString()}`);
-    });
-
-    logStream.on('close', () => {
-        delete logStreams[containerId];
-    });
-});
-
-ipcMain.handle('stop-log-stream', (event, containerId) => {
-    if (logStreams[containerId]) {
-        logStreams[containerId].kill(); // Terminate the stream process
-        delete logStreams[containerId];
-    }
 });
 
 
