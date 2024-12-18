@@ -4,24 +4,8 @@ const { exec } = require('child_process');
 const path = require('path');
 const os = require('os');
 
-let mainWindow;
-let logStreams = {};
-
-function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        icon: path.join(__dirname, 'assets/img/tool-box.png'),
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: true,
-            contextIsolation: true
-        },
-    });
-
-    mainWindow.loadFile('index.html');
-    // mainWindow.webContents.openDevTools();
-}
+let toolboxWindow;
+let tray;
 
 function createToolbox() {
     toolboxWindow = new BrowserWindow({
@@ -53,12 +37,13 @@ function createToolbox() {
         if (y + toolboxWindow.getBounds().height > height) toolboxWindow.setBounds({ y: height - toolboxWindow.getBounds().height });
     });
     
-    toolboxWindow.setPosition(mainWindow.getBounds().x + mainWindow.getBounds().width, mainWindow.getBounds().y);
-    mainWindow.webContents.openDevTools();
+    const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+    toolboxWindow.setPosition(Math.round((width - toolboxWindow.getBounds().width) / 2), Math.round((height - toolboxWindow.getBounds().height) / 2));
+    // toolboxWindow.setPosition(mainWindow.getBounds().x + mainWindow.getBounds().width, mainWindow.getBounds().y);
+    // mainWindow.webContents.openDevTools();
 }
 
 function createTray() {
-    // Load tray icon image
     const iconPath = path.join(__dirname, 'assets/img/tool-box.png');
     tray = new Tray(nativeImage.createFromPath(iconPath));
 
@@ -95,17 +80,17 @@ function toggleToolbox() {
 
 ipcMain.on('theme-changed', (event, theme) => {
     nativeTheme.themeSource = theme; // Change theme source
-    mainWindow.webContents.send('theme-changed', theme); // Notify renderer
+   
 });
 
 app.on('ready', () => {
-    createWindow();
+  
     createToolbox();
     createTray();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
+            createToolbox(); 
         }
     });
 });
@@ -356,7 +341,6 @@ ipcMain.handle('run-container-command', async (event, containerId, command) => {
 
 
 ipcMain.on('minimize', (event) => {
-    mainWindow.minimize();
     toolboxWindow.minimize();
 });
 
