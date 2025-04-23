@@ -11,26 +11,24 @@
     <meta name="theme-color" content="#712cf9">
     <title>Docker PS Table</title>
 
-    <link 
+    <link
         rel='stylesheet'
-        href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' 
+        href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'
     >
-    
-    <link 
-        rel="stylesheet" 
+
+    <link
+        rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@docsearch/css@3"
     >
 
-    <link 
-        href="https://getbootstrap.com/docs/5.3/dist/css/bootstrap.min.css" 
+    <link
+        href="https://getbootstrap.com/docs/5.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-        crossorigin="anonymous"
     >
 
     <link rel="stylesheet" href="styles.css">
 
-    
+
     <style>
         html,
         body {
@@ -170,7 +168,7 @@
             align-items: center;
             gap: 8px; /* Optional: Adjust spacing between image and text */
         }
-        
+
     </style>
 </head>
 
@@ -222,7 +220,7 @@
                     <span class="bi me-2 opacity-50" width="1em" height="1em">
                         <i class='bx bxs-moon' style='color:#ffffff' ></i>
                     </span>
-                   
+
                     Dark
                     <svg class="bi ms-auto d-none" width="1em" height="1em">
                         <use href="#check2"></use>
@@ -253,7 +251,7 @@
                     <h6>Docker <span>Toolbox</span></h6>
                 </div>
                 <div class="col-6">
-    
+
                 </div>
                 <div class="col pt-3">
                     <div class="nav-item dropdown bd-mode-toggle">
@@ -300,7 +298,7 @@
                             data-bs-target="#dead-containers" type="button" role="tab" aria-controls="dead-containers"
                             aria-selected="false">Dead</button>
                     </li>
-    
+
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="always-on-containers-tab" data-bs-toggle="pill"
                             data-bs-target="#always-on-containers" type="button" role="tab"
@@ -312,21 +310,21 @@
                             aria-selected="false" disabled>Disabled</button>
                     </li>
                 </ul>
-    
+
                 <div class="nav nav-pills mb-3">
                     <input type="text" class="nav-item form-control form-control-sm d-none me-1" id="searchInput"
                         placeholder="Search containers..." />
 
-                        
-                        
+
+
                     <a class="nav-item btn btn-light" id="searchButton">
                         <i class='bx bx-search'></i>
                     </a>
                 </div>
-    
+
             </div>
         </nav>
-        
+
         <div class="tab-content" id="pills-tabContent">
             <div class="tab-pane fade show active" id="running-containers" role="tabpanel"
                 aria-labelledby="running-containers-tab" tabindex="0">
@@ -412,7 +410,7 @@
                 </div>
                 <div class="list-group window" id="alwaysOnContainerTable"></div>
             </div>
-    
+
             <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab"
                 tabindex="0">...</div>
         </div>
@@ -503,7 +501,7 @@
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">${container.id}</h5>
                     <small>Created @ ${container.createdAt}</small>
-    
+
                     <div class="nav-item dropdown">
                         <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class='bx bx-dots-vertical-rounded'></i>
@@ -615,10 +613,10 @@
         }
 
 
-      
-        
 
-        
+
+
+
         function minimizeWindow() {
             window.electronAPI.minimize();
         }
@@ -629,10 +627,10 @@
         loadDockerData(); // Load data initially
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">
+     >
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous">
+       >
     </script>
 </body>
 
