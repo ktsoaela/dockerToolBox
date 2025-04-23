@@ -11,24 +11,24 @@
     <meta name="theme-color" content="#712cf9">
     <title>Docker PS Table</title>
 
-    <link 
+    <link
         rel='stylesheet'
-        href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' 
+        href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'
     >
-    
-    <link 
-        rel="stylesheet" 
+
+    <link
+        rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@docsearch/css@3"
     >
 
-    <link 
-        href="https://getbootstrap.com/docs/5.3/dist/css/bootstrap.min.css" 
+    <link
+        href="https://getbootstrap.com/docs/5.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
     <link rel="stylesheet" href="styles.css">
 
-    
+
     <style>
         html,
         body {
@@ -168,7 +168,7 @@
             align-items: center;
             gap: 8px; /* Optional: Adjust spacing between image and text */
         }
-        
+
     </style>
 </head>
 
@@ -220,7 +220,7 @@
                     <span class="bi me-2 opacity-50" width="1em" height="1em">
                         <i class='bx bxs-moon' style='color:#ffffff' ></i>
                     </span>
-                   
+
                     Dark
                     <svg class="bi ms-auto d-none" width="1em" height="1em">
                         <use href="#check2"></use>
@@ -251,14 +251,14 @@
                     <h6>Docker <span>Toolbox</span></h6>
                 </div>
                 <div class="col-6">
-    
+
                 </div>
                 <div class="col pt-3">
                     <div class="nav-item dropdown bd-mode-toggle">
                         <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class='bx bx-cog bx-xs'></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">                        
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
                             <li><a class="dropdown-item" href="#" onclick="loadDockerData()">Refresh</a></li>
                             <li><a class="dropdown-item" href="#" onclick="minimizeWindow()">Minimize</a></li>
                                 <hr class="dropdown-divider">
@@ -294,28 +294,28 @@
                             data-bs-target="#dead-containers" type="button" role="tab" aria-controls="dead-containers"
                             aria-selected="false">Dead</button>
                     </li>
-    
+
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="always-on-containers-tab" data-bs-toggle="pill"
                             data-bs-target="#always-on-containers" type="button" role="tab"
                             aria-controls="always-on-containers" aria-selected="false">Always On</button>
                     </li>
                 </ul>
-    
+
                 <div class="nav nav-pills mb-3">
                     <input type="text" class="nav-item form-control form-control-sm d-none me-1" id="searchInput"
                         placeholder="Search containers..." />
 
-                        
-                        
+
+
                     <a class="nav-item btn btn-light" id="searchButton">
                         <i class='bx bx-search'></i>
                     </a>
                 </div>
-    
+
             </div>
         </nav>
-        
+
         <div class="tab-content" id="pills-tabContent">
             <div class="tab-pane fade show active" id="running-containers" role="tabpanel"
                 aria-labelledby="running-containers-tab" tabindex="0">
@@ -409,6 +409,7 @@
             const searchButton = document.getElementById('searchButton');
             const searchInput = document.getElementById('searchInput');
             const pillsTab = document.getElementById('pills-tab');
+
             // Toggle between showing the nav pills and search input
             searchButton.addEventListener('click', () => {
                 // Hide the nav-pills
@@ -417,35 +418,58 @@
                 searchInput.classList.toggle('d-none');
                 searchInput.focus();
             });
+
             // Filter containers based on search input
             searchInput.addEventListener('input', function() {
                 const query = searchInput.value.toLowerCase();
                 // Get all containers from the list
                 const containerList = document.querySelectorAll('.list-group-item');
+
                 containerList.forEach(item => {
                     const containerText = item.innerText.toLowerCase();
                     // Check if the container's text includes the search query
-                    if (containerText.includes(query)) {
-                        item.classList.remove('d-none'); // Show matching items
-                    } else {
-                        item.classList.add('d-none'); // Hide non-matching items
-                    }
+                    // if (containerText.includes(query)) {
+                    //     item.classList.remove('d-none'); // Show matching items
+                    // } else {
+                    //     item.classList.add('d-none'); // Hide non-matching items
+                    // }
+                    item.classList.toggle('d-none', !containerText.includes(query));
                 });
             });
         });
+
+
+        // const themeToggleButton = document.getElementById('themeToggle');
+        // // Check if dark mode is already applied (for persistence)
+        // const currentTheme = localStorage.getItem('theme');
+        // if (currentTheme === 'dark') {
+        //     document.body.classList.add('dark-mode');
+        //     themeToggleButton.textContent = 'Switch to Light Mode';
+        // }
+        // themeToggleButton.addEventListener('click', () => {
+        //     document.body.classList.toggle('dark-mode');
+        //     const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+        //     localStorage.setItem('theme', theme);
+        //     themeToggleButton.textContent = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        // });
+
+
+        // Theme toggle button
         const themeToggleButton = document.getElementById('themeToggle');
-        // Check if dark mode is already applied (for persistence)
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme === 'dark') {
-            document.body.classList.add('dark-mode');
-            themeToggleButton.textContent = 'Switch to Light Mode';
+        if (themeToggleButton) {
+            // Check if dark mode is already applied (for persistence)
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggleButton.textContent = 'Switch to Light Mode';
+            }
+            themeToggleButton.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                localStorage.setItem('theme', theme);
+                themeToggleButton.textContent = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            });
         }
-        themeToggleButton.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-            localStorage.setItem('theme', theme);
-            themeToggleButton.textContent = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-        });
 
         function toggleAlwaysOn(containerId, element) {
             const isChecked = element.querySelector('input[type="checkbox"]').checked;
@@ -489,7 +513,7 @@
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">${container.id}</h5>
                     <small>Created @ ${container.createdAt}</small>
-    
+
                     <div class="nav-item dropdown">
                         <a class="nav-link " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class='bx bx-dots-vertical-rounded'></i>
@@ -601,10 +625,10 @@
         }
 
 
-      
-        
 
-        
+
+
+
         function minimizeWindow() {
             window.electronAPI.minimize();
         }
